@@ -1,10 +1,14 @@
 #!/bin/bash
+#####
+#Code executed by cron send info like RAM,CPU,HDD usage in JSON through curl as POST request.
+#does not work on 100%
+#####
 
 NAME=${0##*/}
 VER="1.0"
 LINE="-----------------------------------------------------------------------"
 
-	hostname=$1	
+	hostname=$1
 	path=$2
 	user=$3
 	http=$4 #www.het.brown.edu/guide/UNIX-password-security.txt #-random txt k otestovani
@@ -13,12 +17,12 @@ LINE="-----------------------------------------------------------------------"
 connect_ssh()
 {
 	ssh -i ${path} ${user}@${hostname} 2>dev/null && echo "Connected to ${hostname} server" || { echo "Connecting to ${hostname} server....error"; exit 1 ; }
-	cd / 
+	cd /
 }
-	
+
 main()
 {
-		
+
 
 	#check user
 	if id "$user" >/dev/null 2>&1 ;then
@@ -30,8 +34,8 @@ main()
 		else
 			echo "Adding user $user.....error"
 			exit 1
-		fi    	
-	fi 
+		fi
+	fi
 
 
 	#check .ssh directory
@@ -47,22 +51,22 @@ main()
 		fi
 	fi
 
-	
+
 
 	#check authorized_keys file
-	if [ -f /home/${user}/.ssh/authorized_keys ] ;then 
+	if [ -f /home/${user}/.ssh/authorized_keys ] ;then
 		echo "Check if file exists /home/${user}/.ssh/authorized_keys.....OK"
 		if grep -q " ${user}@" /home/${user}/.ssh/authorized_keys ;then
 			echo "Check if file /home/${user}/.ssh/authorized_keys contains $user key.....OK"
-				
-		else   	
-			echo "Check if file /home/${user}/.ssh/authorized_keys contains $user key.....error.....Key will be downloaded at next steps"		 
+
+		else
+			echo "Check if file /home/${user}/.ssh/authorized_keys contains $user key.....error.....Key will be downloaded at next steps"
 			download #download and insert key
-		fi 
+		fi
 	else
-		echo -e "Check if file exists /home/${user}/.ssh/authorized_keys.....NOK.....File will be created at next steps"	
-		download #download and insert key		
-	fi	
+		echo -e "Check if file exists /home/${user}/.ssh/authorized_keys.....NOK.....File will be created at next steps"
+		download #download and insert key
+	fi
 
 
 }
@@ -81,7 +85,7 @@ download()
 		fi
 	else
 		echo "Downloading key into /home/${user}/.ssh/${user}_rsa.pub.....error"
-		exit 1 
+		exit 1
 	fi
 
 	#grep -q /home/${user}/.ssh/${user}_rsa.pub /home/${user}/.ssh/authorized_keys && echo "ok" || echo "error"
@@ -100,14 +104,14 @@ download()
 		echo "Moving key into home/${user}/.ssh/authorized_keys.....error"
 		exit 1
 	fi
-	
+
 }
 
 if [[ $1 == "-h" || $1 == "-help" ||  $# == 0 ]];then
 	echo -e "$LINE\nHelp for $NAME script :: version $VER\n$LINE\nUsage:\n\t<hostname> <path_to_key> <user_name> <http_to_key>\n\tProgram is checking public key for ssh communication\n$LINE"
 elif [[ $1 != "-h" ]] && [[ $# == 4 ]];then
 	connect_ssh
-	main && echo "Script was successfully finished" || { echo "Script has some problems"; exit 1; } 
+	main && echo "Script was successfully finished" || { echo "Script has some problems"; exit 1; }
 else
 	echo -e "Bad input.\nExiting..."
 	exit 1
